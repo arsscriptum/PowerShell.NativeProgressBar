@@ -11,6 +11,7 @@
     <Version>2.2.5</Version>
     <Description>NativeProgressBar</Description>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <ApplicationIcon>info.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

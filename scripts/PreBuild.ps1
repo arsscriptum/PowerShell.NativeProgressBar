@@ -105,7 +105,7 @@ $Script:TestDirectory = Join-Path $Script:RootDirectory "test"
 $Script:TestLoadingDirectories = Join-Path $Script:TestDirectory "loading"
 
 
-Stop-PowerShellProcesses
+#Stop-PowerShellProcesses
 
 Remove-Item "$Script:TestLoadingDirectories" -Recurse -Force -ErrorAction Ignore | Out-Null
 
