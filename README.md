@@ -45,28 +45,25 @@ Displays a progress bar refreshing at every 50 milliseconds in Yellow color
 
 
 ---------------------------------------------------------------------------------------------------------
-### EXAMPLE
+### To Compile
 
-You can use Get-Help to view the help for the function or use the switch -Examples to see some usage examples from the function's native help. Of course, the best way to test and understand Show-Progress is to put it to work. Let's look at a few usage scenarios.
+Load Visual Studio and compile ```NativeProgressBar.csproj```
 
-Use the provided dummy job code for example
-```
-    Get-Help Show-NativeProgressBar -Examples
-```
 
-Start a dummy job with ASCII progress bar
+---------------------------------------------------------------------------------------------------------
+### To Run Test
 
 ```
-
-	. .\Start-DummyJob.ps1 10
-
+    .\test\RunTest.ps1 10 
 ```
+
+
 
 ### Activity Indicator
-![Activity Indicator](https://arsscriptum.github.io/files/gifs/ActivityIndicator.gif)
+![Activity Indicator](https://arsscriptum.github.io/assets/img/posts/custom-progressbar/ActivityIndicator.gif)
 
 ### Progress Bar
-![Progress Wheel](https://arsscriptum.github.io/files/gifs/ProgressWheel.gif)
+![Progress Wheel](https://arsscriptum.github.io/assets/img/posts/custom-progressbar/ProgressWheel.gif)
 
 ### Progress Bar Demo
-![Progress Wheel Demo](https://arsscriptum.github.io/files/gifs/ProgressWheelDemo.gif)
+![Progress Wheel Demo](https://arsscriptum.github.io/assets/img/posts/custom-progressbar/ProgressWheelDemo.gif)
