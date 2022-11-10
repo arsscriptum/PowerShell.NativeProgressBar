@@ -76,8 +76,7 @@ namespace AsciiProgressBar
   
 
     }
-    // Declare the class as a cmdlet and specify the
-    // appropriate verb and noun for the cmdlet name.
+
     [Cmdlet(VerbsLifecycle.Register, "AsciiProgressBar")]
     public class RegisterAsciiProgressBar : PSCmdlet, IDynamicParameters
     {
@@ -88,11 +87,6 @@ namespace AsciiProgressBar
             return this.MyCommonParameters;
         }
 
-
-        // Override the ProcessRecord method to process
-        // the supplied user name and write out a
-        // greeting to the user by calling the WriteObject
-        // method.
         protected override void ProcessRecord()
         {
             Globals.GEncoding = Console.OutputEncoding;
@@ -126,8 +120,6 @@ namespace AsciiProgressBar
     }
 
 
-    // Declare the class as a cmdlet and specify the
-    // appropriate verb and noun for the cmdlet name.
     [Cmdlet(VerbsCommunications.Write, "AsciiProgressBar")]
     public class WriteAsciiProgressBar :   PSCmdlet, IDynamicParameters
     {
