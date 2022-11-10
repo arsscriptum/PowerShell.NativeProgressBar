@@ -13,15 +13,10 @@ using NativeProgressBar.Utility;
 
 namespace NativeProgressBar.Functions
 {
-    [Cmdlet(VerbsCommunications.Write, "AsciiProgressBar")]
-    public class WriteAsciiProgressBar :   BaseNativeProgressBarCmdlet, IDynamicParameters
+    [Cmdlet(VerbsCommunications.Write, "NativeProgressBar")]
+    public class WriteNativeProgressBar : BaseNativeProgressBarCmdlet
     {
-        private CommonParmeters CommonParameters = new CommonParmeters();
-        object IDynamicParameters.GetDynamicParameters()
-        {
-            return this.CommonParameters;
-        }
-            
+
         [Parameter(Position = 0, Mandatory = true)]
         public int Percentage
         {
@@ -71,60 +66,16 @@ namespace NativeProgressBar.Functions
         }
         private ConsoleColor backgroundColor;
 
-        protected static int origRow;
-        protected static int origCol;
-
-        protected static void WriteExt(string s, int x = -1, int y=-1, ConsoleColor foregroudColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black, bool clearline = false, bool noNewLine = true)
+        protected override void BeginProcessing()
         {
-            try
-            {
-                ConsoleColor bg_color = Console.BackgroundColor;
-                ConsoleColor fg_color = Console.ForegroundColor;
-                int cursor_top = Console.CursorTop;
-                int cursor_left = Console.CursorLeft;
-
-                int new_cursor_x = cursor_left;
-                if (x > 0) {
-                    new_cursor_x = x;
-                }
-
-                int new_cursor_y = cursor_top;
-                if (y > 0){
-                    new_cursor_y = y;
-                }
-
-                if (clearline) {
-                    int len = Console.WindowWidth - 1;
-
-                    var empty = new string(' ', len);
-
-                    Console.SetCursorPosition(0, new_cursor_y);
-                    Console.Write(empty);
-                }
-
-                Console.BackgroundColor = backgroundColor;
-                Console.ForegroundColor = foregroudColor;
-
-                Console.SetCursorPosition(new_cursor_x, new_cursor_y);
-                Console.Write(s);
-                Console.WriteLine();
-                if (noNewLine) {
-                    Console.SetCursorPosition(cursor_left, cursor_top); 
-                }
-
-                Console.BackgroundColor = bg_color;
-                Console.ForegroundColor = fg_color;
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                Console.Clear();
-                Console.WriteLine(e.Message);
-            }
+            Globals.GShowCursor = BaseCommonParmeters.ShowCursor;
+            string msg = String.Format("Begin Write-NativeProgressBar. GShowCursor {0}", Globals.GShowCursor);
+            WriteVerbose(msg);
         }
 
-    
         protected override void ProcessRecord()
         {
+        
             bool wasCursorVisible = Console.CursorVisible;
             
             if (Globals.GShowCursor == false)

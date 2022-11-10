@@ -10,6 +10,7 @@
     <SignAssembly>false</SignAssembly>
     <Version>2.2.5</Version>
     <Description>NativeProgressBar</Description>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,5 +28,13 @@
   <ItemGroup>
     <PackageReference Include="System.Management.Automation.dll" Version="10.0.10586" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="pwsh -nop -noni -File &quot;$(ProjectDir)scripts\Deploy.ps1&quot; -Path $(OutDir)" />
+  </Target>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="pwsh -nop -noni -File &quot;$(ProjectDir)scripts\PreBuild.ps1&quot;" />
+  </Target>
 
 </Project>

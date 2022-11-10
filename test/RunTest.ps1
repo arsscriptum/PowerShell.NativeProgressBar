@@ -10,12 +10,30 @@ param(
     [int]$Seconds
 )
 
+ Get-Module -Name "*NativeProgress*" | Remove-Module -Force -Verbose
+$Script:LoadPath = "$PSScriptRoot\loading"
+Remove-Item "$Script:LoadPath" -Recurse -Force -ErrorAction Ignore | Out-Null
 
-Import-Module  "$PSScriptRoot\bin\Release\netcoreapp3.1\NativeProgressBar.dll" -Verbose -Force
+
+[string]$destDll = "{0}\{1}\{2}" -f "$Script:LoadPath", (get-date -UFormat "%H%M%S"), "NativeProgressBar.dll"
+New-Item "$destDll" -ItemType file -Force -ErrorAction Ignore | Out-Null
+Remove-Item "$destDll" -Recurse -Force -ErrorAction Ignore | Out-Null
+$NewDll = Copy-Item "$PSScriptRoot\lib\NativeProgressBar.dll" "$destDll" -Force -Passthru
+$assembly = [System.Reflection.Assembly]::LoadFile($NewDll)
+$assLoc = $assembly.Location
+
+Write-Output "================================================================"
+Write-Output "                           Import                               "
+Write-Output "================================================================"
+Write-Output "NewDll   $NewDll"
+Write-Output "Assembly $assLoc"
+
+
+import-module -Assembly $assembly -verbose -force
 
 $FatalError = $False
 try{
-Get-Command 'Write-AsciiProgressBar' -ErrorAction Stop | Out-Null 
+Get-Command 'Write-NativeProgressBar' -ErrorAction Stop | Out-Null 
 }catch [Exception]{
     Write-Error $_ 
     $FatalError = $True
@@ -69,7 +87,7 @@ function Invoke-DummyJob{
     )
     try{
 
-        Register-AsciiProgressBar $Size
+        Register-NativeProgressBar -Size $Size
         
         $Script:LatestPercentage = 0
         [regex]$pattern = [regex]::new('([\[]+)(?<percent>[\d]+)([\%\ \]]+)')
@@ -86,7 +104,7 @@ function Invoke-DummyJob{
                         $Script:LatestPercentage = $percent
                     }
                      $ProgressMessage = "Completed {0} %" -f $percent
-                     Write-AsciiProgressBar $Script:LatestPercentage $ProgressMessage 50 2 "White" "DarkGray"
+                     Write-NativeProgressBar $Script:LatestPercentage $ProgressMessage 50 2 "White" "DarkGray"
                 
 
                 $JobState = (Get-Job -Name $JobName).State
