@@ -112,7 +112,7 @@ function Invoke-DummyJob{
 
 cls
 $JobCount = (Get-Job).Count
-Write-Host "Removing $JobCount thread jobs" -n
+
 Get-Job | % { $n = $_.Name ;  Write-Host "$n " -n -f Red;Remove-Job $_ -Force ; }
 
 Write-Host "TEST 1 - Progress Indicator"
