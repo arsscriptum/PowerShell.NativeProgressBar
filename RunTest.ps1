@@ -10,9 +10,12 @@ param(
     [int]$Seconds
 )
 
+
+Import-Module  "$PSScriptRoot\bin\Release\netcoreapp3.1\NativeProgressBar.dll" -Verbose -Force
+
 $FatalError = $False
 try{
-Get-Command 'Write-AsciiProgressBar' -ErrorAction Stop 
+Get-Command 'Write-AsciiProgressBar' -ErrorAction Stop | Out-Null 
 }catch [Exception]{
     Write-Error $_ 
     $FatalError = $True
@@ -76,8 +79,6 @@ function Invoke-DummyJob{
         while($Working){
             try{
             
-                if($ProgressIndicator){
-                   
                     $Data = Receive-Job -Name $JobName | Select -Last 1
                     if($Data -match $pattern){
                         [int]$percent = $Matches.percent
@@ -86,7 +87,7 @@ function Invoke-DummyJob{
                     }
                      $ProgressMessage = "Completed {0} %" -f $percent
                      Write-AsciiProgressBar $Script:LatestPercentage $ProgressMessage 50 2 "White" "DarkGray"
-                }
+                
 
                 $JobState = (Get-Job -Name $JobName).State
 
@@ -109,10 +110,11 @@ function Invoke-DummyJob{
 }
 
 
-
+cls
 $JobCount = (Get-Job).Count
 Write-Host "Removing $JobCount thread jobs" -n
 Get-Job | % { $n = $_.Name ;  Write-Host "$n " -n -f Red;Remove-Job $_ -Force ; }
 
-Write-Host "TEST 1 - Actvity Indicator"
-Invoke-DummyJob $Seconds $Seconds 40 50 
+Write-Host "TEST 1 - Progress Indicator"
+Invoke-DummyJob $Seconds $Seconds 40 50
+Write-Host "`n"

@@ -95,11 +95,10 @@ namespace AsciiProgressBar
         // method.
         protected override void ProcessRecord()
         {
-            Console.WriteLine("Current Encoding is {0}, set to {1}", Console.OutputEncoding, Encoding.Unicode);
             Globals.GEncoding = Console.OutputEncoding;
             Console.OutputEncoding = Encoding.Unicode;
 
-            Console.WriteLine("Set Values!");
+      
             Globals.GProgressSw.Reset();
             Globals.GProgressSw.Start();
 
@@ -120,11 +119,7 @@ namespace AsciiProgressBar
 
         protected override void ProcessRecord()
         {
-
-            Console.WriteLine("Current Encoding is {0}, set back to {1}", Console.OutputEncoding, Globals.GEncoding);
             Console.OutputEncoding = Globals.GEncoding;
-
-            Console.WriteLine("StopTimer");
             Globals.GProgressSw.Reset();
             Globals.GProgressSw.Stop();
         }
@@ -143,7 +138,7 @@ namespace AsciiProgressBar
             return this.MyCommonParameters;
         }
             
-        [Parameter(Mandatory = true)]
+        [Parameter(Position = 0, Mandatory = true)]
         public int Percentage
         {
             get { return percentage; }
@@ -151,7 +146,7 @@ namespace AsciiProgressBar
         }
         private int percentage;
 
-        [Parameter(Mandatory = true)]
+        [Parameter(Position = 1, Mandatory = true)]
         public string Message
         {
             get { return message; }
@@ -159,23 +154,23 @@ namespace AsciiProgressBar
         }
         private string message;
 
-        [Parameter(Mandatory = false)]
+        [Parameter(Position = 2, Mandatory = false)]
         public int UpdateDelay
         {
             get { return updatedelay; }
             set { updatedelay = value; }
         }
-        private int updatedelay;
+        private int updatedelay = 100;
 
-        [Parameter(Mandatory = false)]
+        [Parameter(Position = 3, Mandatory = false)]
         public int ProcessDelay
         {
             get { return processdelay; }
             set { processdelay = value; }
         }
-        private int processdelay;
+        private int processdelay = 5;
 
-        [Parameter(Mandatory = false)]
+        [Parameter(Position = 4, Mandatory = false)]
         public ConsoleColor ForegroundColor
         {
             get { return foregroundColor; }
@@ -184,7 +179,7 @@ namespace AsciiProgressBar
         private ConsoleColor foregroundColor;
 
 
-        [Parameter(Mandatory = false)]
+        [Parameter(Position = 5, Mandatory = false)]
         public ConsoleColor BackgroundColor
         {
             get { return backgroundColor; }
@@ -288,7 +283,7 @@ namespace AsciiProgressBar
 
             string strprogress = String.Format("[{0}] {1}", p, message);
 
-            WriteExt(strprogress, -1, -1, Console.ForegroundColor, Console.BackgroundColor, true, true);
+            WriteExt(strprogress, -1, -1, foregroundColor, backgroundColor, true, true);
            
 
 
