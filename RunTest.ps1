@@ -69,7 +69,7 @@ function Invoke-DummyJob{
     )
     try{
 
-        Register-AsciiProgressBar -Size $Size 
+        Register-AsciiProgressBar $Size
         
         $Script:LatestPercentage = 0
         [regex]$pattern = [regex]::new('([\[]+)(?<percent>[\d]+)([\%\ \]]+)')
