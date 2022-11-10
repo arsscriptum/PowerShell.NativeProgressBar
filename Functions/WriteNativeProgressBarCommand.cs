@@ -9,147 +9,17 @@ using System;
 using System.Text;
 using System.Management.Automation;
 using System.Diagnostics;
+using NativeProgressBar.Utility;
 
-namespace AsciiProgressBar
+namespace NativeProgressBar.Functions
 {
-    static class Globals
-    {
-        static bool _showCursor = false;
-        public static bool GShowCursor
-        {
-            set { _showCursor = value; }
-            get { return _showCursor; }
-        }
-
-        static DateTime _startTime;
-        public static DateTime GStartTime
-        {
-            set { _startTime = value; }
-            get { return _startTime; }
-        }
-        static int _currentSpinnerIndex;
-        public static int GCurrentSpinnerIndex
-        {
-            set { _currentSpinnerIndex = value; }
-            get { return _currentSpinnerIndex; }
-        }
-        static double _max;
-        public static double GMax
-        {
-            set { _max = value; }
-            get { return _max; }
-        }
-
-        static double _half;
-        public static double GHalf
-        {
-            set { _half = value; }
-            get { return _half; }
-        }
-   
-        static double _pos;
-        public static double GPos
-        {
-            set { _pos = value; }
-            get { return _pos; }
-        }
-
-        static Encoding _encoding;
-        public static Encoding GEncoding
-        {
-            set { _encoding = value; }
-            get { return _encoding; }
-        }
-
-        // global int using get/set
-        static double _gsize;
-        public static double GSize
-        {
-            set { _gsize = value; }
-            get { return _gsize; }
-        }
-        public static Stopwatch GProgressSw
-        {
-            set { _stopwatch = value; }
-            get { return _stopwatch; }
-        }
-        static Stopwatch _stopwatch = new Stopwatch();
-    }
-    internal class MyCommonParmeters
-    {
-        [Parameter(Mandatory = false)]
-        public double Size
-        {
-            get { return Globals.GSize; }
-            set { Globals.GSize = value; }
-        }
-        [Parameter(Mandatory = false)]
-        public bool ShowCursor
-        {
-            get { return Globals.GShowCursor; }
-            set { Globals.GShowCursor = value; }
-        }
-    }
-
-    [Cmdlet(VerbsLifecycle.Register, "AsciiProgressBar")]
-    public class RegisterAsciiProgressBar : PSCmdlet
-    {
-        [Parameter(Position = 0, Mandatory = true)]
-        public double Size
-        {
-            get { return _size; }
-            set { _size = value; }
-        }
-        private double _size;
-
-        [Parameter( Mandatory = false )]
-        public bool ShowCursor
-        {
-            get { return _showCursor; }
-            set { _showCursor = value; }
-        }
-        private bool _showCursor = false;
-
-        protected override void ProcessRecord()
-        {
-            Globals.GEncoding = Console.OutputEncoding;
-            Console.OutputEncoding = Encoding.Unicode;
-
-            Globals.GProgressSw.Reset();
-            Globals.GProgressSw.Start();
-
-            Globals.GStartTime = DateTime.Now;
-            Globals.GMax = Size;
-            Globals.GSize = Size;
-            Globals.GHalf = Size  /2 ;
-            Globals.GPos = 0;
-            Globals.GCurrentSpinnerIndex = 0;
-
-            Globals.GShowCursor = ShowCursor;
-        }
-    }
-
-
-    [Cmdlet(VerbsLifecycle.Unregister, "AsciiProgressBar")]
-    public class UnregisterAsciiProgressBar : Cmdlet
-    {
-        protected override void ProcessRecord()
-        {
-            Console.OutputEncoding = Globals.GEncoding;
-            Globals.GProgressSw.Reset();
-            Globals.GProgressSw.Stop();
-
-        }
-    }
-
-
     [Cmdlet(VerbsCommunications.Write, "AsciiProgressBar")]
-    public class WriteAsciiProgressBar :   PSCmdlet, IDynamicParameters
+    public class WriteAsciiProgressBar :   BaseNativeProgressBarCmdlet, IDynamicParameters
     {
-        private MyCommonParmeters MyCommonParameters = new MyCommonParmeters();
+        private CommonParmeters CommonParameters = new CommonParmeters();
         object IDynamicParameters.GetDynamicParameters()
         {
-            return this.MyCommonParameters;
+            return this.CommonParameters;
         }
             
         [Parameter(Position = 0, Mandatory = true)]
