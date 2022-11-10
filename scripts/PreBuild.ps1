@@ -24,9 +24,30 @@ $Script:TestDirectory = Join-Path $Script:RootDirectory "test"
 $Script:TestLoadingDirectories = Join-Path $Script:TestDirectory "loading"
 $Script:PkPath = Join-Path $Script:ToolsDirectory "pk.exe"
 
-$pkExe = $Script:PkPath
 
-&"$pkExe" "pwsh"
+$pkExe = $Script:PkPath
+# This is a personal tool fo mine, I will not publish unknown exe for other so this will be missing for you
+if(Test-PAth $pkExe){
+    &"$pkExe" "pwsh"
+}
+
+# instead, let's try and kill powershell using these lines
+$taskkill_path = (Get-command 'taskkill.exe').Source
+$taskkill_arguments = [system.collections.arraylist]::new()
+$log = "$taskkill_path "
+if(Test-PAth $taskkill_path){
+    $PwshProcesses = get-process | Where Name -match "pwsh"
+    ForEach($id in $PwshProcesses.Id){
+        [void]$taskkill_arguments.Add("/PID")
+        [void]$taskkill_arguments.Add("$id")
+        $log += "/PID $id "
+    }
+    [void]$taskkill_arguments.Add("/T")
+    $log += "/T"
+}
+
+Write-Output "Runnning: `n`"$log`""
+Start-Process -FilePath $taskkill_path -ArgumentList $taskkill_arguments -NoNewWindow -Wait
 
 Remove-Item "$Script:TestLoadingDirectories" -Recurse -Force -ErrorAction Ignore | Out-Null
 
