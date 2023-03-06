@@ -33,3 +33,6 @@ test/lib/**
 
 # Microsoft Visual Studio Solution
 *.sln
+
+tmp
+tmp/**

@@ -4,43 +4,7 @@
 #̷𝓍   🇵​​​​​🇴​​​​​🇼​​​​​🇪​​​​​🇷​​​​​🇸​​​​​🇭​​​​​🇪​​​​​🇱​​​​​🇱​​​​​ 🇸​​​​​🇨​​​​​🇷​​​​​🇮​​​​​🇵​​​​​🇹​​​​​ 🇧​​​​​🇾​​​​​ 🇬​​​​​🇺​​​​​🇮​​​​​🇱​​​​​🇱​​​​​🇦​​​​​🇺​​​​​🇲​​​​​🇪​​​​​🇵​​​​​🇱​​​​​🇦​​​​​🇳​​​​​🇹​​​​​🇪​​​​​.🇶​​​​​🇨​​​​​@🇬​​​​​🇲​​​​​🇦​​​​​🇮​​​​​🇱​​​​​.🇨​​​​​🇴​​​​​🇲​​​​​
 #>
 
-[CmdletBinding(SupportsShouldProcess)]
-param(
-    [Parameter(Mandatory = $True, Position = 0, HelpMessage="Run for x seconds")] 
-    [int]$Seconds
-)
 
- Get-Module -Name "*NativeProgress*" | Remove-Module -Force -Verbose
-$Script:LoadPath = "$PSScriptRoot\loading"
-Remove-Item "$Script:LoadPath" -Recurse -Force -ErrorAction Ignore | Out-Null
-
-
-[string]$destDll = "{0}\{1}\{2}" -f "$Script:LoadPath", (get-date -UFormat "%H%M%S"), "NativeProgressBar.dll"
-New-Item "$destDll" -ItemType file -Force -ErrorAction Ignore | Out-Null
-Remove-Item "$destDll" -Recurse -Force -ErrorAction Ignore | Out-Null
-$NewDll = Copy-Item "$PSScriptRoot\lib\NativeProgressBar.dll" "$destDll" -Force -Passthru
-$assembly = [System.Reflection.Assembly]::LoadFile($NewDll)
-$assLoc = $assembly.Location
-
-Write-Output "================================================================"
-Write-Output "                           Import                               "
-Write-Output "================================================================"
-Write-Output "NewDll   $NewDll"
-Write-Output "Assembly $assLoc"
-
-
-import-module -Assembly $assembly -verbose -force
-
-$FatalError = $False
-try{
-Get-Command 'Write-NativeProgressBar' -ErrorAction Stop | Out-Null 
-}catch [Exception]{
-    Write-Error $_ 
-    $FatalError = $True
-}
-if($FatalError){
-    return
-}
 
 $DummyJobScript = {
       param($RunForSeconds)
@@ -127,12 +91,3 @@ function Invoke-DummyJob{
     }
 }
 
-
-cls
-$JobCount = (Get-Job).Count
-
-Get-Job | % { $n = $_.Name ;  Write-Host "$n " -n -f Red;Remove-Job $_ -Force ; }
-
-Write-Host "TEST 1 - Progress Indicator"
-Invoke-DummyJob $Seconds $Seconds 40 50
-Write-Host "`n"
