@@ -4,8 +4,17 @@
 #̷𝓍   🇵​​​​​🇴​​​​​🇼​​​​​🇪​​​​​🇷​​​​​🇸​​​​​🇭​​​​​🇪​​​​​🇱​​​​​🇱​​​​​ 🇸​​​​​🇨​​​​​🇷​​​​​🇮​​​​​🇵​​​​​🇹​​​​​ 🇧​​​​​🇾​​​​​ 🇬​​​​​🇺​​​​​🇮​​​​​🇱​​​​​🇱​​​​​🇦​​​​​🇺​​​​​🇲​​​​​🇪​​​​​🇵​​​​​🇱​​​​​🇦​​​​​🇳​​​​​🇹​​​​​🇪​​​​​.🇶​​​​​🇨​​​​​@🇬​​​​​🇲​​​​​🇦​​​​​🇮​​​​​🇱​​​​​.🇨​​​​​🇴​​​​​🇲​​​​​
 #>
 
+
+[CmdletBinding(SupportsShouldProcess)]
+param(
+    [Parameter(Mandatory = $false)] 
+    [switch]$ReloadModule
+)
+
 $Script:RootPath = (Resolve-Path "$PSScriptRoot\..").Path
 $Script:TmpPath = Join-Path $Script:RootPath "tmp"
+
+
 
 function Write-ModuleObjectDump{
 
@@ -152,10 +161,10 @@ function Remove-NativeProgressModules{
         Write-Host "                           CleanUp                              " -f DarkRed
         Write-Host "================================================================" -f DarkYellow
         Write-Host "Unloading all previously loaded modules matching `"*NativeProgress*`""
-        Get-Module -Name "*NativeProgress*" | Remove-Module -Force -Verbose
+        Get-Module -Name "*NativeProgress*" | Remove-Module -Force
         $Script:RootPath = (Resolve-Path "$PSScriptRoot\..").Path
         $Script:TmpPath = Join-Path $Script:RootPath "tmp"
-        
+        $Script:ErrorOccured = $False
         try{
             if(Test-Path "$Script:TmpPath" -PathType Container){
                 Remove-Item "$Script:TmpPath" -Recurse -Force -ErrorAction Stop -ErrorVariable DeleteError | Out-Null
@@ -168,6 +177,7 @@ function Remove-NativeProgressModules{
         }catch{
             Write-Host "`t[ERROR] " -n -f DarkRed
             Write-Host "$_" -f DarkYellow
+            $Script:ErrorOccured = $True
         }
         [System.Collections.ArrayList]$NativeProgressModules = Get-Variable -Name "NativeProgressModules" -ValueOnly -Scope Global -ErrorAction Ignore
         if($NativeProgressModules -ne $Null){
@@ -186,6 +196,61 @@ function Remove-NativeProgressModules{
         Write-Error "$_"
     }
     return $null
+}
+
+
+function Test-NativeProgressModuleUnloaded{
+
+    [CmdletBinding(SupportsShouldProcess)]
+    param() 
+  
+    try{
+        $Script:UnloadCompleted = $True
+        $LoadedModules = Get-Module -Name "*NativeProgress*"
+        $LoadedModulesCount = $LoadedModules.Count
+
+        if($LoadedModulesCount -gt 0){
+            Write-Host "[ERROR] " -n -f DarkRed
+            Write-Host "Still $LoadedModulesCount Modules loaded!" -f DarkYellow
+            $Script:UnloadCompleted = $False
+        }
+        $Script:RootPath = (Resolve-Path "$PSScriptRoot\..").Path
+        $Script:TmpPath = Join-Path $Script:RootPath "tmp"
+        $Script:ErrorOccured = $False
+
+        [System.Collections.ArrayList]$ItemsToDelete = [System.Collections.ArrayList]::new()
+        if(Test-Path "$Script:TmpPath" -PathType Container){
+            [void]$ItemsToDelete.Add($Script:TmpPath)
+            $Dlls = (Get-ChildItem -Path "$Script:TmpPath" -File -Filter "*.dll" -Recurse).Fullname
+            ForEach($file in $Dlls){
+                [void]$ItemsToDelete.Add($file)
+            }
+        }
+        $ItemsToDeleteCount = $ItemsToDelete.Count
+
+        if($ItemsToDeleteCount -gt 0){
+            Write-Host "[ERROR] " -n -f DarkRed
+            Write-Host "Still $ItemsToDeleteCount Iems to delete!" -f DarkYellow
+            ForEach($item in $ItemsToDelete){
+                Write-Host "`t[$item]" -f Gray
+            }
+            $Script:UnloadCompleted = $False
+        }
+
+        [System.Collections.ArrayList]$NativeProgressModules = Get-Variable -Name "NativeProgressModules" -ValueOnly -Scope Global -ErrorAction Ignore
+        if($NativeProgressModules -ne $Null){
+            $NativeProgressModulesCount = $NativeProgressModules.Count 
+            if($NativeProgressModulesCount -gt 0){
+                $Script:UnloadCompleted = $False
+                Write-Host "`"NativeProgressModules`" variable. Count of $NativeProgressModulesCount" -f Gray
+            }
+            
+        }
+        return $Script:UnloadCompleted
+    }catch [Exception]{
+        Write-Error "$_"
+    }
+    return $Script:UnloadCompleted
 }
 
 
@@ -230,7 +295,7 @@ function New-NativeProgressAssembly{
             $NowTimeSeconds = ConvertTo-CTime($NowTime)
             Write-Host "`t[OK]`t" -f DarkGreen -NoNewLine
             Write-Host "import-module -Assembly `"$assembly`"" -f red
-            $NewModule = import-module -Assembly $assembly -verbose -force -Passthru
+            $NewModule = import-module -Assembly $assembly -force -Passthru
             Write-Host "`t[OK]`t" -f DarkGreen -NoNewLine
             Write-Host "Adding `"LoadTime`" property to module variable`nNowTimeSeconds = $NowTimeSeconds"
             Add-Member -InputObject $NewModule -MemberType NoteProperty -Name "LoadTime" -Value "$NowTimeSeconds"
@@ -486,3 +551,32 @@ function Initialize-NativeProgressModule{
     return $null
 }
 
+
+
+if($ReloadModule){
+    try{
+        Write-Host "================================================================" -f DarkYellow
+        Write-Host "                Reload-NativeProgressModule                     " -f DarkRed
+        Write-Host "================================================================" -f DarkYellow
+
+        Remove-NativeProgressModules
+
+        $Unloaded = Test-NativeProgressModuleUnloaded
+        if($Unloaded -eq $True){
+            Write-Host "[  OK  ] " -n -f DarkGreen
+            Write-Host " UNLOAD COMPLETE" -f DarkCyan
+            New-NativeProgressAssembly -LoadModules
+        }else{
+            Write-Host "[ERROR] " -n -f DarkRed
+            Write-Host " NOT FULLY UNLOADED" -f DarkYellow
+            return
+        }
+        
+        Write-NativeProgressModuleStates
+
+
+    }catch [Exception]{
+        Write-Error "$_"
+    }
+
+}

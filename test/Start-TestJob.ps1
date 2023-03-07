@@ -7,7 +7,9 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [Parameter(Mandatory = $True, Position = 0, HelpMessage="Run for x seconds")] 
-    [int]$Seconds
+    [int]$Seconds,
+    [Parameter(Mandatory = $false)] 
+    [switch]$AutoStart
 )
 
 
@@ -110,6 +112,20 @@ if($Script:FatalError){
 }
 
 
-#Test-NativeProgressModuleDependencies
 
-#Start-NativeProgressTest
+if($AutoStart){
+    Test-NativeProgressModuleDependencies
+    if($Script:FatalError){
+        Write-Host "Fatal Error: Exiting." -f Red
+        return
+    }
+
+    Write-Host "`n`n"
+    Write-Host "================================================================" -f DarkYellow
+    Write-Host "                      PRESS A KEY TO START                      " -f DarkRed
+    Write-Host "================================================================" -f DarkYellow
+
+    Read-Host " . "
+    cls
+    Start-NativeProgressTest
+}
