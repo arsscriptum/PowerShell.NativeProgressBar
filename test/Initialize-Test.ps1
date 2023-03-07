@@ -569,6 +569,9 @@ if($ReloadModule){
         }else{
             Write-Host "[ERROR] " -n -f DarkRed
             Write-Host " NOT FULLY UNLOADED" -f DarkYellow
+            $CommandLineToRun = Get-Process -Id $PID  |  Select -ExpandProperty CommandLine
+            Start-Process "$CommandLineToRun"
+            Get-Process -Id $PID  | Stop-Process
             return
         }
         
